@@ -1,0 +1,2 @@
+所述coloredlogs包使著色终端输出用于Python的日志记录 模块。该ColoredFormatter从类继承logging.Formatter和使用 ANSI转义序列来呈现颜色的日志信息。
+
