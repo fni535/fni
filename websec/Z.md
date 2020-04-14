@@ -415,5 +415,63 @@ tcp
  （先把机器做成跳板、漏洞攻击、钓鱼、minikatz抓票据、伪造白银票据） 主要看信息收集了哪些东西
 拿域控
 
+### IIS
+
+目录解析(6.0)
+形式：www.xxx.com/xx.asp/xx.jpg
+原理: 服务器默认会把.asp，.asa目录下的文件都解析成asp文件。
+
+文件解析
+形式：www.xxx.com/xx.asp;.jpg
+原理：服务器默认不解析;号后面的内容，因此xx.asp;.jpg便被解析成asp文件了。
+
+解析文件类型
+IIS6.0 默认的可执行文件除了asp还包含这三种 :
+
+/test.asa
+/test.cer
+/test.cdx
+
+**IIS 7.0/IIS 7.5/ Nginx <0.8.3畸形解析漏洞**
+
+在默认Fast-CGI开启状况下，访问以下网址，服务器将把xx.jpg文件当做php解析并执行。
+ `http://www.xxx.com/xx.jpg/.php`
 
 
+
+### Apache
+
+Apache 解析文件的规则是从右到左开始判断解析,如果后缀名为不可识别文件解析,就再往左判断。比如 test.php.owf.rar “.owf”和”.rar” 这两种后缀是apache不可识别解析,apache就会把wooyun.php.owf.rar解析成php。
+
+（1）如果在 Apache 的 conf 里有这样一行配置 AddHandler php5-script .php 这时只要文件名里包含.php 即使文件名是 test2.php.jpg 也会以 php 来执行。
+（2）如果在 Apache 的 conf 里有这样一行配置 AddType application/x-httpd-php .jpg 即使扩展名是 jpg，一样能以 php 方式执行。
+
+修复：
+
+1.apache配置文件，禁止.php.这样的文件执行，配置文件里面加入
+
+```
+<Files ~ “.(php.|php3.)”>
+        Order Allow,Deny
+        Deny from all
+</Files>
+```
+
+2.用伪静态能解决这个问题，重写类似.php.*这类文件，打开apache的httpd.conf找到LoadModule rewrite_module modules/mod_rewrite.so
+把#号去掉，重启apache,在网站根目录下建立.htaccess文件,代码如下:
+
+```
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .(php.|php3.) /index.php
+RewriteRule .(pHp.|pHp3.) /index.php
+RewriteRule .(phP.|phP3.) /index.php
+RewriteRule .(Php.|Php3.) /index.php
+RewriteRule .(PHp.|PHp3.) /index.php
+RewriteRule .(PhP.|PhP3.) /index.php
+RewriteRule .(pHP.|pHP3.) /index.php
+RewriteRule .(PHP.|PHP3.) /index.php
+</IfModule>
+```
+
+### Nginx
